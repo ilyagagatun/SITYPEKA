@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>СИТУАЦИЯ — Telegram Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Google Fonts: Unbounded для заголовков в стиле презентации и Inter для текста -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Всплывающий тост -->
+    <div id="toast">🎁 Бонус добавлен в корзину!</div>
+
+    <div class="app-container">
+        <!-- Верхняя шапка -->
+        <header class="app-header">
+            <div class="brand-box">
+                <div class="duck-avatar" onclick="triggerDuckQuack()">🦆</div>
+                <div>
+                    <div class="brand-title">СИТУАЦИЯ</div>
+                    <div class="brand-sub"><span class="live-dot"></span> Бар в твоём телефоне</div>
+                </div>
+            </div>
+            <button class="brutal-btn secondary" style="width: auto; padding: 7px 11px; font-size: 11px;" onclick="switchTab('vault')">
+                🎁 <span id="headerVaultCount">0</span>
+            </button>
+        </header>
+
+        <!-- ==================== ВКЛАДКА 1: ЖИВОЙ ЭКРАН + СТРИКИ + АКЦИИ ==================== -->
+        <section id="tab-live" class="tab-screen active">
+            <h1 class="title-stroke" style="font-size: 24px; margin-bottom: 12px;">Живой экран бара</h1>
+
+            <div class="live-grid">
+                <div class="live-box tilted" onclick="cycleOccupancy()">
+                    <div class="live-box-title">Сейчас в баре</div>
+                    <div class="live-box-sub" id="occupancyText">Загруженность: средняя 🍹</div>
+                </div>
+
+                <div class="live-box tilted-right">
+                    <div class="live-box-title">Было гостей</div>
+                    <div class="live-box-sub">Более 600 человек 🔥</div>
+                </div>
+
+                <div class="live-box" onclick="openMenuHighlight('Ситуация «Папа вернулся»')">
+                    <div class="live-box-title">Коктейль-дня</div>
+                    <div class="live-box-sub">«Папа вернулся» <b>720 ₽</b></div>
+                </div>
+
+                <div class="live-box pink tilted" onclick="openMenuHighlight('Пэн Ис Паста')">
+                    <div class="live-box-title">Блюдо-дня</div>
+                    <div class="live-box-sub">«Пэн Ис Паста» <b>450 ₽</b></div>
+                </div>
+
+                <div class="live-box pink" style="grid-column: span 2;">
+                    <div class="live-box-title">До спец-раздачи шотов</div>
+                    <div class="live-box-sub" id="liveCountdown">34 минуты 00 сек</div>
+                    <div class="push-sticker">пуш уведомлением на телефон</div>
+                </div>
+
+                <div class="live-box pink-soft" style="grid-column: span 2;">
+                    <div class="live-box-title">До mexica-time 🌮</div>
+                    <div class="live-box-sub">даже для нас это сюрприз (следи за пушами)</div>
+                </div>
+            </div>
+
+            <!-- СТРИК ПОСТОЯННОГО ГОСТЯ (Слайд 6) -->
+            <div class="brutal-card">
+                <div class="streak-header">
+                    <div>
+                        <h2 class="title-stroke" style="font-size: 18px;">Стрик: огонёк гостя</h2>
+                        <p style="font-size: 11px; font-weight: 600; margin-top: 2px;">Каждый визит с чеком от 3000 ₽ зажигает огонёк</p>
+                    </div>
+                    <div class="price-tag" id="streakBadge">2 / 10 🔥</div>
+                </div>
+
+                <div class="streak-flames" id="streakFlamesContainer"></div>
+
+                <div class="streak-rewards-grid">
+                    <div class="streak-tier" id="tier-3">
+                        <span class="streak-tier-count">3 визита</span>
+                        <div style="font-weight: 800; font-size: 12px;">Три шота</div>
+                        <div style="font-size: 10px; color: var(--gray);">серия из 3 чеков</div>
+                    </div>
+                    <div class="streak-tier" id="tier-5">
+                        <span class="streak-tier-count">5 визитов</span>
+                        <div style="font-weight: 800; font-size: 12px;">Секретный коктейль</div>
+                        <div style="font-size: 10px; color: var(--gray);">нет в меню</div>
+                    </div>
+                    <div class="streak-tier" id="tier-10">
+                        <span class="streak-tier-count">10 визитов</span>
+                        <div style="font-weight: 800; font-size: 12px;">Скидка + коктейль</div>
+                        <div style="font-size: 10px; color: var(--gray);">статус легенды</div>
+                    </div>
+                </div>
+
+                <button class="brutal-btn secondary" onclick="simulateCheckIn()">
+                    🔥 Отметить визит (чек от 3000 ₽)
+                </button>
+            </div>
+
+            <!-- АКЦИИ И РЕПОСТ (Слайд 7) -->
+            <div class="brutal-card" style="background: var(--pink-light);">
+                <h2 class="title-stroke" style="font-size: 18px; margin-bottom: 6px;">Репост = Коктейль</h2>
+                <p style="font-size: 12px; font-weight: 600; margin-bottom: 12px;">
+                    Поделись постом из нашего ТГ-канала, покажи официанту и забери велком-дринк прямо в корзину бонусов!
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; font-size: 10px; font-weight: 800; margin-bottom: 12px;">
+                    <div style="background:#fff; border:1.5px solid #000; padding:6px; border-radius:8px;">1. Нажать</div>
+                    <div style="background:#fff; border:1.5px solid #000; padding:6px; border-radius:8px;">2. Перейти</div>
+                    <div style="background:#fff; border:1.5px solid #000; padding:6px; border-radius:8px;">3. Репост</div>
+                    <div style="background:#fff; border:1.5px solid #000; padding:6px; border-radius:8px;">4. Забрать</div>
+                </div>
+                <button class="brutal-btn" onclick="claimRepostBonus()">
+                    📢 Поделиться и забрать коктейль
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== ВКЛАДКА 2: ИИ-БАРМЕН (Слайд 1) ==================== -->
+        <section id="tab-ai" class="tab-screen">
+            <div class="brutal-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h1 class="title-stroke" style="font-size: 23px;">ИИ-Бармен</h1>
+                        <p style="font-size: 13px; font-weight: 700; margin-top: 4px;">Какая у тебя сегодня ситуация?</p>
+                    </div>
+                    <div style="font-size: 38px;">🦆🍸</div>
+                </div>
+
+                <!-- Ситуации точно из Слайда 1 -->
+                <div class="mood-chips" id="moodChipsContainer"></div>
+
+                <!-- Блок рекомендации -->
+                <div id="aiRecommendationCard" class="ai-result-box"></div>
+            </div>
+        </section>
+
+        <!-- ==================== ВКЛАДКА 3: КОЛЕСО СИТУАЦИЙ (Слайд 10) ==================== -->
+        <section id="tab-wheel" class="tab-screen">
+            <div class="brutal-card" style="text-align: center;">
+                <h1 class="title-stroke" style="font-size: 23px;">Колесо ситуаций</h1>
+                <p style="font-size: 12px; font-weight: 600; margin-top: 4px;">
+                    Крути колесо при чеке в баре! Выигранный приз сохраняется в корзине бонусов на <b>3–7 дней</b>.
+                </p>
+
+                <div class="wheel-wrapper">
+                    <div class="wheel-pointer"></div>
+                    <canvas id="wheelCanvas" width="520" height="520"></canvas>
+                    <div class="wheel-center-cap">🦆</div>
+                </div>
+
+                <div style="margin-bottom: 10px; font-size: 12px; font-weight: 800;">
+                    Доступно вращений: <span id="spinsCounter" style="background:var(--pink-main); padding:2px 8px; border:1.5px solid #000; border-radius:6px;">2</span>
+                </div>
+
+                <button id="spinBtn" class="brutal-btn orange" onclick="spinWheel()">
+                    🎰 КРУТИТЬ КОЛЕСО
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== ВКЛАДКА 4: МЕНЮ И БРОНЬ (Слайды 8, 9) ==================== -->
+        <section id="tab-menu" class="tab-screen">
+            <div class="menu-Segment">
+                <div class="seg-btn active" id="seg-bar" onclick="switchMenuMode('bar')">🍹 СИТУАЦИЯ: ПИТЬ</div>
+                <div class="seg-btn" id="seg-kitchen" onclick="switchMenuMode('kitchen')">🍜 СИТУАЦИЯ: ЕСТЬ</div>
+                <div class="seg-btn" id="seg-book" onclick="switchMenuMode('book')">📅 БРОНЬ СТОЛА</div>
+            </div>
+
+            <!-- Блок меню -->
+            <div id="menuListSection">
+                <input type="text" id="menuSearchInput" class="brutal-input" placeholder="🔍 Найти коктейль, пасту или шот..." oninput="renderMenuItems()">
+                <div class="category-scroll" id="categoryPills"></div>
+                <div id="menuItemsContainer"></div>
+            </div>
+
+            <!-- Блок бронирования стола -->
+            <div id="bookingSection" style="display: none;">
+                <div class="brutal-card">
+                    <h2 class="title-stroke" style="font-size: 20px; margin-bottom: 8px;">Бронь в «Ситуации»</h2>
+                    <p style="font-size: 12px; font-weight: 600; margin-bottom: 14px;">
+                        Заявка мгновенно уходит администратору бара. При бронировании через апп — велком-шот в корзину!
+                    </p>
+                    <input type="text" id="bookName" class="brutal-input" placeholder="Твоё имя">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="date" id="bookDate" class="brutal-input">
+                        <input type="time" id="bookTime" class="brutal-input" value="20:00">
+                    </div>
+                    <select id="bookGuests" class="brutal-input">
+                        <option value="2 гостя">Компания: 2 гостя</option>
+                        <option value="3-4 гостя">Компания: 3–4 гостя</option>
+                        <option value="5-7 гостей">Компания: 5–7 гостей</option>
+                        <option value="8+ (Пунш-патруль)">8+ гостей (нужен большой стол)</option>
+                    </select>
+                    <input type="text" id="bookComment" class="brutal-input" placeholder="Какая ситуация? (ДР, пятница, свидание)">
+                    <button class="brutal-btn green" onclick="submitBooking()">
+                        ✅ Отправить бронь администратору
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ВКЛАДКА 5: КОРЗИНА БОНУСОВ (Сгорают за 3-7 дней) ==================== -->
+        <section id="tab-vault" class="tab-screen">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                <h1 class="title-stroke" style="font-size: 22px;">Мои бонусы</h1>
+                <span style="font-size: 11px; font-weight: 800; background: #fff; border: 2px solid #000; padding: 4px 8px; border-radius: 8px;">
+                    ⏳ Живут 3–7 дней
+                </span>
+            </div>
+            <p style="font-size: 12px; font-weight: 600; margin-bottom: 14px;">
+                Покажи выбранный бонус бармену или официанту. Внимание: не нажимай «Погасить» заранее — бонус сгорит!
+            </p>
+
+            <div id="vaultItemsContainer"></div>
+        </section>
+    </div>
+
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" data-tab="live" onclick="switchTab('live')">
+            <span class="nav-icon">🦆</span>
+            <span>Бар</span>
+        </div>
+        <div class="nav-item" data-tab="ai" onclick="switchTab('ai')">
+            <span class="nav-icon">🤖</span>
+            <span>ИИ-Бармен</span>
+        </div>
+        <div class="nav-item" data-tab="wheel" onclick="switchTab('wheel')">
+            <span class="nav-icon">🎡</span>
+            <span>Колесо</span>
+        </div>
+        <div class="nav-item" data-tab="menu" onclick="switchTab('menu')">
+            <span class="nav-icon">🍸</span>
+            <span>Меню</span>
+        </div>
+        <div class="nav-item" data-tab="vault" onclick="switchTab('vault')">
+            <span class="nav-icon">🎁</span>
+            <span>Бонусы</span>
+            <div class="vault-badge" id="navVaultBadge">0</div>
+        </div>
+    </nav>
+
+    <!-- МОДАЛЬНОЕ ОКНО ВЫИГРЫША / ПОГАШЕНИЯ -->
+    <div class="modal-overlay" id="prizeModal">
+        <div class="modal-card">
+            <div style="font-size: 48px; margin-bottom: 8px;" id="modalEmoji">🎉</div>
+            <h2 class="title-stroke" style="font-size: 22px; margin-bottom: 8px;" id="modalTitle">Твой приз!</h2>
+            <p style="font-size: 14px; font-weight: 700; margin-bottom: 12px;" id="modalDesc"></p>
+            <div id="modalExtraBox" style="background:#fff; border:2px solid #000; border-radius:12px; padding:10px; margin-bottom:16px; font-size:12px; font-weight:800;"></div>
+            <button class="brutal-btn" id="modalActionBtn" onclick="closeModal()">Супер, в корзину!</button>
+        </div>
+    </div>
+
+    <!-- Конфетти -->
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+    <!-- Проверка возраста (18+) -->
+    <div class="modal-overlay age-gate" id="ageGate" role="dialog" aria-modal="true" aria-labelledby="ageTitle">
+        <div class="modal-card">
+            <div class="age-emoji">🔞</div>
+            <h2 class="title-stroke age-title" id="ageTitle">Тебе есть 18?</h2>
+            <p class="age-text">В приложении есть алкогольное меню. Продолжай, только если тебе уже исполнилось 18 лет.</p>
+            <div class="age-actions">
+                <button class="brutal-btn green" onclick="confirmAge()">Мне есть 18</button>
+                <button class="brutal-btn secondary" onclick="denyAge()">Мне нет 18</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="confetti.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
